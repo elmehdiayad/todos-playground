@@ -1,0 +1,44 @@
+services:
+
+  frontend:
+    container_name: todo-app-react
+    build:
+      context: react-front
+      dockerfile: Dockerfile
+    volumes:
+      - "./react-front:/app"
+      - "/app/node_modules"
+    ports:
+      - 3000:3000
+    depends_on:
+      - backend
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+        
+  backend:
+    image: 'docker-spring-boot-postgres:latest'
+    container_name: todo-app-spring
+    build:
+      context: spring-backend
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    volumes:
+      - "./spring-backend:/app"
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/compose-postgres
+      - SPRING_DATASOURCE_USERNAME=compose-postgres
+      - SPRING_DATASOURCE_PASSWORD=compose-postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
+  db:
+    image: 'postgres:13.1-alpine'
+    container_name: todo-app-db
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=compose-postgres
+      - POSTGRES_PASSWORD=compose-postgres
+      
